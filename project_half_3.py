@@ -14,23 +14,20 @@ def printMenu():
     print("9. Exit")
 
 def saveNewEntry(dict_by_id, list_of_id):
-    id = input("ID: ")
 
-    id = checkParamIsNumber(id, "ID")
+    id = checkParamIsNumber(input("ID: "), "ID")
     if id == -1:
-        return -1
+        return 0
 
     if id in dict_by_id:
         print("Error: ID already exists: " + str(dict_by_id[id]))
-        return -1
+        return 0
 
     name = input("Name: ")
 
-    age = (input("Age: ")) 
-
-    age = checkParamIsNumber(age, "age")
+    age = checkParamIsNumber(input("Age: "), "age")
     if age == -1:
-        return -1
+        return 0
     
     dict_by_id[id] = (name, age)     
     list_of_id.append(id)
@@ -101,10 +98,6 @@ def saveAllData(dict_by_id, path_to_conf):
         print("Error: Config file conf.json is missing in path " + os.getcwd())
         return
 
-    id_table_tile = ""
-    name_table_title = ""
-    age_table_title = ""
-
     with open(path_to_conf) as conf_json:
         conf = json.load(conf_json)
         id_table_tile = conf["id"]
@@ -117,8 +110,7 @@ def saveAllData(dict_by_id, path_to_conf):
         curr_raw[id_table_tile] = id
         curr_raw[name_table_title] = dict_by_id[id][0]
         curr_raw[age_table_title] = dict_by_id[id][1]
-        peolpe_list.append(curr_raw)\
-    
+        peolpe_list.append(curr_raw)
 
     people_df = pd.DataFrame(peolpe_list)
     people_df.to_csv(output_filename, index = False)
@@ -173,8 +165,7 @@ while True:
     choise = input("Please enter your choise: ")
     if choise == "1":
         age = saveNewEntry(dict_by_id, list_of_id)
-        if age != -1:
-            sum_of_ages += age
+        sum_of_ages += age
 
     elif choise == "2":
         searchById(dict_by_id)
