@@ -1,10 +1,5 @@
-import importlib
 from person import Person 
-# from utils import checkParamIsNumber
-
-def checkParamIsNumber(str, floatr_value=False):
-    module = importlib.import_module("utils")
-    return module.checkParamIsNumber(str, floatr_value)
+from utils import checkParamIsNumber
 
 class Employee(Person):
     def __init__(self, id, name, age):
@@ -29,5 +24,15 @@ class Employee(Person):
         print(tab_str + "Field: " + self.getField())
         print(tab_str + "Salary: " + str(self.getSalary()))
 
-    def printMySelf(self, idx):
+    def printMySelf(self, idx):     
         self.printEmployee(idx)
+
+    def employeeAsDict(self):
+        emp_dict = super().personAsDict()
+        emp_dict["field"] = self.getField()
+        emp_dict["salary"] = self.getSalary()
+        return emp_dict
+
+    def mySelfAsDict(self):
+        return self.employeeAsDict()
+

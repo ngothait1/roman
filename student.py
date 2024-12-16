@@ -1,9 +1,5 @@
-import importlib
 from person import Person
-
-def checkParamIsNumber(str, float_value=False):
-    module = importlib.import_module("utils")
-    return module.checkParamIsNumber(str, float_value)
+from utils import checkParamIsNumber
 
 class Student(Person):
     def __init__(self, id, name, age):
@@ -39,3 +35,13 @@ class Student(Person):
     
     def printMySelf(self, idx):
         self.printStudent(idx)
+
+    def studentAsDict(self):
+        stud_dict = super().personAsDict()
+        stud_dict["field"] = self.getField()
+        stud_dict["year of study"] = self.getYear()
+        stud_dict["average score"] = self.getAvg()
+        return stud_dict
+    
+    def mySelfAsDict(self):
+        return self.studentAsDict()
