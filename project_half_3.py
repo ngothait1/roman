@@ -1,4 +1,5 @@
 from utils import *
+from interface import *
 
 dict_by_id = {}
 list_of_person = list()
@@ -9,8 +10,12 @@ while True:
     error_indicator = False
     printMenu()
     try:
-        choise = None
-        choise = input("Please enter your choise: ")
+        try:
+            choise_input = input("Please enter your choise: ")
+            choise = int(choise_input)
+        except ValueError:
+            choise = choise_input
+        
         if choise == Menu.SAVE_NEW_ENTRY.value:
             age = saveNewEntry(dict_by_id, list_of_person)
             sum_of_ages += age
@@ -39,7 +44,7 @@ while True:
         print("Error: to finish the program, please choose 9 in the main menu")
     finally:
         try:
-            if (choise != "9") and (not error_indicator):
+            if (choise != 9) and (not error_indicator):
                 holder = input("Press enter to continue ")
         except KeyboardInterrupt:
             print("\nError: to finish the program, please choose 9 in the main menu")

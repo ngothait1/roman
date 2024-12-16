@@ -40,4 +40,10 @@ class Person:
         else:
             print("ID: " + str(self.getId()))
         return tab_str
+    
+    def personAsDict(self):
+        return {"id": self.getId(), "name": self.getName(), "age": self.getAge()}
+    
+    def mySelfAsDict(self):
+        return self.personAsDict()
 
