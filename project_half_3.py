@@ -1,6 +1,8 @@
 import os
 import json
 import pandas as pd
+from employee import Employee # type: ignore
+from student import Student # type: ignore
 
 def printMenu():
     print("1. Save a new entry")
@@ -13,27 +15,46 @@ def printMenu():
     print("8. Save all data")
     print("9. Exit")
 
-def saveNewEntry(dict_by_id, list_of_id):
-    id = input("ID: ")
+def saveNewEntry(dict_by_id, list_of_person):
 
-    id = checkParamIsNumber(id, "ID")
+    id = checkParamIsNumber(input("ID: "), "ID")
     if id == -1:
-        return -1
+        return 0
 
     if id in dict_by_id:
         print("Error: ID already exists: " + str(dict_by_id[id]))
-        return -1
+        return 0
 
     name = input("Name: ")
 
-    age = (input("Age: ")) 
-
-    age = checkParamIsNumber(age, "age")
+    age = checkParamIsNumber(input("Age: "), "age")
     if age == -1:
-        return -1
+        return 0
     
-    dict_by_id[id] = (name, age)     
-    list_of_id.append(id)
+    flag = None
+    while flag != "1" and flag !="2":
+        flag  = input("If you are an employee - press 1, if you are a student - press 2: ")
+
+    if flag == "1":
+        field = input("Field of work: ")
+
+        salary = checkParamIsNumber(input("Salary: "), "salary",)
+        if salary == -1:
+            return 0
+        
+        person = Employee(id, name, age, field, salary)
+    else:
+        field = input("Field of study: ")
+        year = checkParamIsNumber(input("Year of study: "), "year of study")
+        if year == -1:
+            return 0
+        avg = checkParamIsNumber(input("Average score: "), "avegare score", float_value=True)
+        if avg == -1:
+            return 0
+        person = Student(id, name, age, field, year, avg)
+    
+    dict_by_id[id] = person
+    list_of_person.append(person)     
     print("ID [" + str(id) + "] saved successfully")
     return int(age)
     
@@ -46,64 +67,55 @@ def searchById(dict_by_id):
         return -1
 
     if id in dict_by_id:
-        printById(id)
+        dict_by_id[id].printPerson()
     else:
         print("Error: ID " + str(id) + " is not saved")
 
 
-def printAgesAverage(sum_of_ages, list_of_id):
-    if len(list_of_id) == 0:
+def printAgesAverage(sum_of_ages, list_of_person):
+    if len(list_of_person) == 0:
         print("0")
         return
-    res = sum_of_ages / len(list_of_id)
+    res = sum_of_ages / len(list_of_person)
     print(str(res))
 
 
 
-def printAllNames(dict_by_id):
-    if len(dict_by_id) == 0:
-        return
-    for idx, value in enumerate(dict_by_id.values()):
-        print(str(idx) + ". " + value[0])
+def printAllNames(list_of_person):
+    for idx, person in enumerate(list_of_person):
+        print(str(idx) + ". " + person.getName())
 
 
 
 def printAllIds(dict_by_id):
-    if len(dict_by_id) == 0:
-        return
-    for idx, id in enumerate(dict_by_id.keys()):
-        print(str(idx) + ". " + str(id))
+    for idx, person in enumerate(list_of_person):
+        print(str(idx) + ". " + str(person.getId()))
 
 
-def printAllEntries(dict_by_id):
-    if len(dict_by_id) == 0:
-        return
-    for idx, id  in enumerate(dict_by_id.keys()):
-        printById(id, idx)
+def printAllEntries(list_of_person):
+    for idx, person  in enumerate(list_of_person):
+        person.printMySelf(idx)
 
 
-def printEntryByIndex(list_of_id):
+def printEntryByIndex(list_of_person):
     idx = input("Index: ")
 
     if not idx.isdigit():
         printIndexErrorNotNumber(idx)
         return
     idx = int(idx)
-    if idx >= len(list_of_id) or idx < 0:
-        printIndexErrorOutOfRange(idx, len(list_of_id))
+
+    if idx >= len(list_of_person) or idx < 0:
+        printIndexErrorOutOfRange(idx, len(list_of_person))
     else:
-        printById(list_of_id[idx])
+        list_of_person[idx].printPerson()
 
 
-def saveAllData(dict_by_id, path_to_conf):
+def saveAllData(list_of_person, path_to_conf):
     output_filename = input("What is your output file name? ")
     if not os.path.exists(path_to_conf):
         print("Error: Config file conf.json is missing in path " + os.getcwd())
         return
-
-    id_table_tile = ""
-    name_table_title = ""
-    age_table_title = ""
 
     with open(path_to_conf) as conf_json:
         conf = json.load(conf_json)
@@ -112,13 +124,12 @@ def saveAllData(dict_by_id, path_to_conf):
         age_table_title = conf["age"]
 
     peolpe_list = []
-    for id in dict_by_id.keys():
+    for person in list_of_person:
         curr_raw = {}
-        curr_raw[id_table_tile] = id
-        curr_raw[name_table_title] = dict_by_id[id][0]
-        curr_raw[age_table_title] = dict_by_id[id][1]
-        peolpe_list.append(curr_raw)\
-    
+        curr_raw[id_table_tile] = person.getId()
+        curr_raw[name_table_title] = person.getName()
+        curr_raw[age_table_title] = person.getAge()
+        peolpe_list.append(curr_raw)
 
     people_df = pd.DataFrame(peolpe_list)
     people_df.to_csv(output_filename, index = False)
@@ -132,24 +143,19 @@ def exitSystem():
         print("Goodbye!")
         exit()
 
-def checkParamIsNumber(param, param_name):
-    if  not param.isdigit():
-        printParamErrorNotNumber(param, param_name)
-        return -1
-    
-    return int(param)
-
-def printById(id, idx=-1):
-    tab_str = ""
-    if idx != -1:
-        tab_str = "    "
-        print(str(idx) +  ". " + str(id))  
+def checkParamIsNumber(param, param_name, float_value = False):
+    if not float_value:
+        if  not param.isdigit():
+            printParamErrorNotNumber(param, param_name)
+            return -1
+        
+        return int(param)    
     else:
-        print("ID: " + str(id))
-    
-    print(tab_str + "Name: " + dict_by_id[id][0])
-    print(tab_str + "Age: " + str(dict_by_id[id][1]))
-
+        split_of_float = param.strip().split(".")
+        if (not split_of_float[0].isdigit()) or (not split_of_float[1].isdigit()) or len(split_of_float) != 2:
+            print(split_of_float)
+            printParamErrorNotNumber(param, param_name)
+        return float(param)
 
 def printParamErrorNotNumber(param, param_name):
     print("Error, " + param_name + " must be a number. " + param + " is not a number")
@@ -166,30 +172,29 @@ def printIndexErrorOutOfRange(idx, num_people):
 
 tab_str = "   "
 dict_by_id = {}
-list_of_id = []
+list_of_person = list()
 sum_of_ages = 0
 while True:
     printMenu()
     choise = input("Please enter your choise: ")
     if choise == "1":
-        age = saveNewEntry(dict_by_id, list_of_id)
-        if age != -1:
-            sum_of_ages += age
+        age = saveNewEntry(dict_by_id, list_of_person)
+        sum_of_ages += age
 
     elif choise == "2":
         searchById(dict_by_id)
     elif choise == "3":
-        printAgesAverage(sum_of_ages, list_of_id)
+        printAgesAverage(sum_of_ages, list_of_person)
     elif choise == "4":
-        printAllNames(dict_by_id)
+        printAllNames(list_of_person)
     elif choise == "5":
-        printAllIds(dict_by_id)
+        printAllIds(list_of_person)
     elif choise == "6":
-        printAllEntries(dict_by_id)
+        printAllEntries(list_of_person)
     elif choise == "7":
-        printEntryByIndex(list_of_id)
+        printEntryByIndex(list_of_person)
     elif choise == "8":
-        saveAllData(dict_by_id, "conf.json")
+        saveAllData(list_of_person, "conf.json")
         continue
     elif choise == "9":
         exitSystem()
